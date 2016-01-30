@@ -7,6 +7,33 @@ public class User implements Comparator<User> {
 
     int userId;
     double score;
+    int rating;
+    int movieId;
+    int predictedRating;
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public int getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
+    }
+
+    public int getPredictedRating() {
+        return predictedRating;
+    }
+
+    public void setPredictedRating(int predictedRating) {
+        this.predictedRating = predictedRating;
+    }
 
     public int getUserId() {
         return userId;
