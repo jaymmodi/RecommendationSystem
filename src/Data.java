@@ -11,18 +11,18 @@ public class Data {
         makeUserRatingMap(ratingMap);
 
         Recommendation recommendation = new Recommendation(ratingMap);
-        ArrayList<User> similarUsers = recommendation.findSimilarUsers(ratingMap, 1);
+//        ArrayList<User> similarUsers = recommendation.findSimilarUsers(1);
 
         int topSimilarUsers = 50;
-        readTestFile();
+        readTestFile(recommendation,topSimilarUsers);
 
 
-        printList(similarUsers);
+//        printList(similarUsers);
     }
 
-    private static void readTestFile() {
+    private static void readTestFile(Recommendation recommendation, int topSimilarUsers) {
         try {
-            FileReader fileReader = new FileReader(new File("u1.test"));
+            FileReader fileReader = new FileReader(new File("test"));
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             String line;
@@ -34,7 +34,7 @@ public class Data {
                 user.setMovieId(Integer.valueOf(datafields[1]));
                 user.setRating(Integer.valueOf(datafields[2]));
 
-                user.setPredictedRating(getPredictedRating(user.getUserId()));
+                user.setPredictedRating(getPredictedRating(recommendation, user.getUserId(), Integer.valueOf(datafields[1])));
 
 
             }
@@ -44,8 +44,12 @@ public class Data {
 
     }
 
-    private static int getPredictedRating(int userId) {
-        return 0;
+    private static int getPredictedRating(Recommendation recommendation, int userId, Integer movieId) {
+
+        int rating = recommendation.getPrediction(userId, movieId);
+        System.out.println("rating = " + rating);
+
+        return rating;
     }
 
     private static void printList(ArrayList<User> similarUsers) {

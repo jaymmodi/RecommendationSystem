@@ -11,7 +11,7 @@ public class Recommendation {
         this.ratingMap = ratingMap;
     }
 
-    public ArrayList<User> findSimilarUsers(HashMap<Integer, HashMap<Integer, Integer>> ratingMap, int userId) {
+    public ArrayList<User> findSimilarUsers(int userId) {
         ArrayList<User> scoreList = new ArrayList<>();
 
         HashMap<Integer, Integer> maptoCompare = ratingMap.get(userId);
@@ -61,4 +61,33 @@ public class Recommendation {
         Collections.sort(scoreList, new User());
     }
 
+    public int getPrediction(int userId, Integer movieId) {
+        ArrayList<User> similarUsers = findSimilarUsers(userId);
+        ArrayList<Integer> similarRatings = new ArrayList<>();
+
+        for (User similarUser : similarUsers) {
+//
+            HashMap<Integer, Integer> movieRatingMap = ratingMap.get(similarUser.getUserId());
+            if (movieRatingMap.containsKey(movieId)) {
+                if (similarRatings.size() <= 50) {
+                    similarRatings.add(movieRatingMap.get(movieId));
+                } else {
+                    break;
+                }
+            }
+        }
+
+
+        return getAvg(similarRatings);
+
+    }
+
+    private int getAvg(ArrayList<Integer> similarRatings) {
+        int sum = 0;
+        for (Integer similarRating : similarRatings) {
+            sum += similarRating;
+        }
+
+        return sum / similarRatings.size();
+    }
 }
