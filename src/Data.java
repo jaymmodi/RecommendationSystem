@@ -9,37 +9,45 @@ public class Data {
 
         HashMap<Integer, HashMap<Integer, Integer>> ratingMap = new HashMap<>();
         makeUserRatingMap(ratingMap);
-        ArrayList<Integer> similarUsers = findSimilarUsers(ratingMap, 1);
+        ArrayList<User> similarUsers = findSimilarUsers(ratingMap, 1);
 
         printList(similarUsers);
     }
 
-    private static void printList(ArrayList<Integer> similarUsers) {
-        for (Integer similarUser : similarUsers) {
-            System.out.println(similarUser);
+    private static void printList(ArrayList<User> similarUsers) {
+        for (User similarUser : similarUsers) {
+            System.out.println(similarUser.getUserId() + " ----> " + similarUser.getScore());
         }
     }
 
-    private static ArrayList<Integer> findSimilarUsers(HashMap<Integer, HashMap<Integer, Integer>> ratingMap, int userId) {
-        ArrayList<Integer> scoreList = new ArrayList<>();
+    private static ArrayList<User> findSimilarUsers(HashMap<Integer, HashMap<Integer, Integer>> ratingMap, int userId) {
+        ArrayList<User> scoreList = new ArrayList<>();
 
         HashMap<Integer, Integer> maptoCompare = ratingMap.get(userId);
 
         for (int i = 1; i <= ratingMap.size(); i++) {
             if (i != userId) {
                 HashMap<Integer, Integer> compareWith = ratingMap.get(i);
-                int score = getEuclideanDistance(maptoCompare, compareWith);
-                scoreList.add(score);
+                double score = getEuclideanDistance(maptoCompare, compareWith);
+                User user = new User();
+                user.setUserId(i);
+                user.setScore(score);
+                scoreList.add(user);
             }
 
         }
-        Collections.sort(scoreList, Collections.reverseOrder());
+        customSort(scoreList);
         return scoreList;
     }
 
-    private static int getEuclideanDistance(HashMap<Integer, Integer> mapToCompare, HashMap<Integer, Integer> compareWith) {
+    private static void customSort(ArrayList<User> scoreList) {
+        Collections.sort(scoreList, new User());
+    }
+
+    private static double getEuclideanDistance(HashMap<Integer, Integer> mapToCompare, HashMap<Integer, Integer> compareWith) {
         Iterator it = mapToCompare.entrySet().iterator();
-        int distance = 0;
+        double distance = 0;
+        int matchCount = 0;
 
         while (it.hasNext()) {
             Map.Entry<Integer, Integer> pair = (Map.Entry) it.next();
@@ -49,10 +57,17 @@ public class Data {
 
             if (compareWith.containsKey(movieId)) {
                 int ratingTwo = compareWith.get(movieId);
-                distance += Math.abs(ratingOne - ratingTwo);
+                distance += Math.pow(ratingOne - ratingTwo, 2);
+                ++matchCount;
             }
         }
-        return distance;
+
+        if (matchCount == 0) {
+            return Double.MAX_VALUE;
+        }
+
+
+        return Math.sqrt(distance);
     }
 
     private static void makeUserRatingMap(HashMap<Integer, HashMap<Integer, Integer>> ratingMap) {
