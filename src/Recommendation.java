@@ -5,12 +5,16 @@ import java.util.*;
  */
 public class Recommendation {
 
+    public String metric;
     public HashMap<Integer, HashMap<Integer, Integer>> ratingMap;
+    String evalType;
     int topSimilarUsers;
 
-    public Recommendation(HashMap<Integer, HashMap<Integer, Integer>> ratingMap, int topSimilarUsers) {
+    public Recommendation(HashMap<Integer, HashMap<Integer, Integer>> ratingMap, int topSimilarUsers, String evalType, String metric) {
         this.ratingMap = ratingMap;
         this.topSimilarUsers = topSimilarUsers;
+        this.evalType = evalType;
+        this.metric = metric;
     }
 
     public ArrayList<User> findSimilarUsers(int userId) {
@@ -29,7 +33,11 @@ public class Recommendation {
             }
 
         }
+        if(scoreList.size() == 0) {
+            System.out.println("empty hai");
+        }
         customSort(scoreList);
+
         return scoreList;
     }
 
@@ -91,7 +99,11 @@ public class Recommendation {
             sum += similarRating;
         }
 
-        avg = sum / similarRatings.size();
+        if (similarRatings.size() > 0) {
+            avg = sum / similarRatings.size();
+        }else{
+            avg = 3;
+        }
 
         return (int) Math.round(avg);
     }

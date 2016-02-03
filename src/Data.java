@@ -7,21 +7,60 @@ import java.util.*;
 public class Data {
     public static void main(String[] args) {
 
-        HashMap<Integer, HashMap<Integer, Integer>> userRatingMap = new HashMap<>();
-        HashMap<Integer, List<Integer>> movieRatingMap = new HashMap<>();
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            int topSimilarUsers = 25;
 
-        makeUserRatingMap(userRatingMap, movieRatingMap);
+            System.out.println("Please select a eval Type :  1. Average 2. Maximum Frequency ");
+            String evalType = br.readLine();
+            evalType = validateEvalType(evalType);
+            if (evalType.equals("exit")) {
+                System.out.println("Invalid Inputs. Try again");
+                System.exit(-1);
+            }
 
-        int topSimilarUsers = 50;
-        Recommendation recommendation = new Recommendation(userRatingMap, topSimilarUsers);
+            System.out.println("Please select distance Metric :  1. Euclidean 2. Manhattan 3. Lmax");
+            String metric = br.readLine();
+            metric = validateMetric(metric);
+            if (evalType.equals("exit")) {
+                System.out.println("Invalid Inputs. Try again");
+                System.exit(-1);
+            }
 
-        readTestFile(recommendation);
+            System.out.println("Calculation MAD for whole 100K data points");
 
+            HashMap<Integer, HashMap<Integer, Integer>> userRatingMap = new HashMap<>();
+            HashMap<Integer, List<Integer>> movieRatingMap = new HashMap<>();
+
+            makeUserRatingMap(userRatingMap, movieRatingMap);
+
+            Recommendation recommendation = new Recommendation(userRatingMap, topSimilarUsers, metric, evalType);
+
+            readTestFile(recommendation);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String validateMetric(String metric) {
+        if (metric.equalsIgnoreCase("Euclidean") || metric.equals("1") || metric.equalsIgnoreCase("Manhattan") || metric.equals("2") || metric.equalsIgnoreCase("Lmax") || metric.equals("3")) {
+            return metric;
+        }
+
+        return "exit";
+    }
+
+    private static String validateEvalType(String evalType) {
+        if (evalType.equalsIgnoreCase("Average") || evalType.equals("1") || evalType.equalsIgnoreCase("Maximum Frequency") || evalType.equals("2")) {
+            return evalType;
+        }
+
+        return "exit";
     }
 
     private static void readTestFile(Recommendation recommendation) {
         try {
-            FileReader fileReader = new FileReader(new File("test"));
+            FileReader fileReader = new FileReader(new File("u1.test"));
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             String line;
