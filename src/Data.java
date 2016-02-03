@@ -5,6 +5,9 @@ import java.util.*;
  * Created by jay on 1/29/16.
  */
 public class Data {
+
+    public static double MAD = 0;
+
     public static void main(String[] args) {
 
         try {
@@ -27,16 +30,16 @@ public class Data {
                 System.exit(-1);
             }
 
-            System.out.println("Calculation MAD for whole 100K data points");
+            System.out.println("Calculation MAD for k =  " + topSimilarUsers + " whole 100K data points ");
 
             HashMap<Integer, HashMap<Integer, Integer>> userRatingMap = new HashMap<>();
             HashMap<Integer, List<Integer>> movieRatingMap = new HashMap<>();
-
-            makeUserRatingMap(userRatingMap, movieRatingMap);
-
             Recommendation recommendation = new Recommendation(userRatingMap, topSimilarUsers, metric, evalType);
 
+            makeUserRatingMap(userRatingMap, movieRatingMap);
             readTestFile(recommendation);
+
+            System.out.println(MAD / 100000);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,10 +78,12 @@ public class Data {
                 user.setPredictedRating(getPredictedRating(recommendation, user.getUserId(), Integer.valueOf(dataFields[1])));
 
                 System.out.println("True= " + user.getRating() + " Predicted= " + user.getPredictedRating());
+                MAD += Math.abs(user.getRating() - user.getPredictedRating());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
     }
 
