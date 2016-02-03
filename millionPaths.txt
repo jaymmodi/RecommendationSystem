@@ -1,0 +1,10 @@
+/l/b565/ml-10M100K/r1.train
+/l/b565/ml-10M100K/r2.train
+/l/b565/ml-10M100K/r3.train
+/l/b565/ml-10M100K/r4.train
+/l/b565/ml-10M100K/r5.train
+/l/b565/ml-10M100K/r1.test
+/l/b565/ml-10M100K/r2.test
+/l/b565/ml-10M100K/r3.test
+/l/b565/ml-10M100K/r4.test
+/l/b565/ml-10M100K/r5.test

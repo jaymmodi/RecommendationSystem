@@ -14,6 +14,22 @@ public class Data {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             int topSimilarUsers = 7;
+            String delimiter;
+
+
+            ArrayList<String> trainFiles = new ArrayList<>();
+            ArrayList<String> testFiles = new ArrayList<>();
+
+            System.out.println("Please select a dataset :  1. 100k 2. 10M ");
+            String dataSetType = br.readLine();
+            dataSetType = validateDataSet(dataSetType);
+            if (dataSetType.equals("exit")) {
+                System.out.println("Invalid Inputs. Try again");
+                System.exit(-1);
+            }
+
+            makePathArrays(trainFiles, testFiles, dataSetType);
+            delimiter = getDelimiter(dataSetType);
 
             System.out.println("Please select a eval Type :  1. Average 2. Maximum Frequency ");
             String evalType = br.readLine();
@@ -31,22 +47,64 @@ public class Data {
                 System.exit(-1);
             }
 
-            System.out.println("Calculation MAD for k =  " + topSimilarUsers + " whole 100K data points ");
 
             HashMap<Integer, HashMap<Integer, Integer>> userRatingMap = new HashMap<>();
             HashMap<Integer, List<Integer>> movieRatingMap = new HashMap<>();
             Recommendation recommendation = new Recommendation(userRatingMap, movieRatingMap, topSimilarUsers, metric, evalType);
 
-
-            String fileNames[] = {"u1","u2","u3","u4","u5"};
-
-            for (String fileName : fileNames) {
-                makeUserRatingMap(userRatingMap, movieRatingMap, fileName + ".base");
-                readTestFile(recommendation, fileName + ".test");
+            for (int i = 0; i < trainFiles.size(); i++) {
+                makeUserRatingMap(userRatingMap, movieRatingMap, trainFiles.get(i), delimiter);
+                readTestFile(recommendation, testFiles.get(i), delimiter);
             }
 
-            System.out.println("MAD = " + MAD / 100000);
-            System.out.println("Naive MAD = " + SIMPLEMAD/ 100000);
+            printMAD(delimiter);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void printMAD(String delimiter) {
+        if(delimiter.equals("\t")){
+            System.out.println("MAD " +  MAD/100000);
+            System.out.println("NaiveMAD " +  SIMPLEMAD/100000);
+        }else{
+            System.out.println("MAD " +  MAD/10000000);
+            System.out.println("NaiveMAD " +  SIMPLEMAD/10000000);
+        }
+    }
+
+    private static String validateDataSet(String dataSetType) {
+        if (dataSetType.equalsIgnoreCase("100k") || dataSetType.equals("1")) {
+            return "paths.txt";
+        } else if (dataSetType.equalsIgnoreCase("10M") || dataSetType.equals("2")) {
+            return "millionPaths.txt";
+        } else {
+            return "exit";
+        }
+    }
+
+    private static String getDelimiter(String dataSetType) {
+        if (dataSetType.equalsIgnoreCase("paths.txt")) {
+            return "\t";
+        } else if (dataSetType.equalsIgnoreCase("millionPaths.txt")) {
+            return "::";
+        } else {
+            return "exit";
+        }
+    }
+
+    private static void makePathArrays(ArrayList<String> trainFiles, ArrayList<String> testFiles, String pathFile) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(pathFile));
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                if (line.contains("base") || line.contains("train")) {
+                    trainFiles.add(line);
+                } else if (line.contains("test")) {
+                    testFiles.add(line);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,14 +126,14 @@ public class Data {
         return "exit";
     }
 
-    private static void readTestFile(Recommendation recommendation, String testFileName) {
+    private static void readTestFile(Recommendation recommendation, String testFileName, String delimiter) {
         try {
             FileReader fileReader = new FileReader(new File(testFileName));
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                String dataFields[] = line.split("\t");
+                String dataFields[] = line.split(delimiter);
 
                 User user = new User();
                 user.setUserId(Integer.valueOf(dataFields[0]));
@@ -87,7 +145,7 @@ public class Data {
 
                 System.out.println("True= " + user.getRating() + " Predicted= " + user.getPredictedRating());
                 MAD += Math.abs(user.getRating() - user.getPredictedRating());
-                SIMPLEMAD += Math.abs(user.getNaiveRating()-user.getRating());
+                SIMPLEMAD += Math.abs(user.getNaiveRating() - user.getRating());
 
             }
         } catch (IOException e) {
@@ -113,15 +171,15 @@ public class Data {
     }
 
 
-    private static void makeUserRatingMap(HashMap<Integer, HashMap<Integer, Integer>> userRatingMap, HashMap<Integer, List<Integer>> movieRatingMap, String trainFileName) {
+    private static void makeUserRatingMap(HashMap<Integer, HashMap<Integer, Integer>> userRatingMap, HashMap<Integer, List<Integer>> movieRatingMap, String filePath, String delimiter) {
         try {
-            FileReader fileReader = new FileReader(new File(trainFileName));
+            FileReader fileReader = new FileReader(new File(filePath));
             BufferedReader br = new BufferedReader(fileReader);
 
             String line;
 
             while ((line = br.readLine()) != null) {
-                String[] dataFields = line.split("\t");
+                String[] dataFields = line.split(delimiter);
 
                 Integer userId = Integer.valueOf(dataFields[0]);
                 Integer movieId = Integer.valueOf(dataFields[1]);
