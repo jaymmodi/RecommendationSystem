@@ -1,3 +1,5 @@
+package PartA;
+
 import java.io.*;
 import java.util.*;
 
@@ -48,7 +50,7 @@ public class Data {
             }
 
 
-            HashMap<Integer, HashMap<Integer, Integer>> userRatingMap = new HashMap<>();
+            HashMap<Integer, HashMap<Integer, Double>> userRatingMap = new HashMap<>();
             HashMap<Integer, List<Integer>> movieRatingMap = new HashMap<>();
             Recommendation recommendation = new Recommendation(userRatingMap, movieRatingMap, topSimilarUsers, metric, evalType);
 
@@ -128,6 +130,7 @@ public class Data {
 
     private static void readTestFile(Recommendation recommendation, String testFileName, String delimiter) {
         try {
+            System.out.println("Reading Test");
             FileReader fileReader = new FileReader(new File(testFileName));
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
@@ -138,7 +141,7 @@ public class Data {
                 User user = new User();
                 user.setUserId(Integer.valueOf(dataFields[0]));
                 user.setMovieId(Integer.valueOf(dataFields[1]));
-                user.setRating(Integer.valueOf(dataFields[2]));
+                user.setRating(Double.valueOf(dataFields[2]));
 
                 user.setPredictedRating(getPredictedRating(recommendation, user.getUserId(), Integer.valueOf(dataFields[1])));
                 user.setNaiveRating(getNaiveRating(recommendation, Integer.valueOf(dataFields[1])));
@@ -171,8 +174,9 @@ public class Data {
     }
 
 
-    private static void makeUserRatingMap(HashMap<Integer, HashMap<Integer, Integer>> userRatingMap, HashMap<Integer, List<Integer>> movieRatingMap, String filePath, String delimiter) {
+    private static void makeUserRatingMap(HashMap<Integer, HashMap<Integer, Double>> userRatingMap, HashMap<Integer, List<Integer>> movieRatingMap, String filePath, String delimiter) {
         try {
+            System.out.println("Reading Train");
             FileReader fileReader = new FileReader(new File(filePath));
             BufferedReader br = new BufferedReader(fileReader);
 
@@ -183,7 +187,7 @@ public class Data {
 
                 Integer userId = Integer.valueOf(dataFields[0]);
                 Integer movieId = Integer.valueOf(dataFields[1]);
-                Integer rating = Integer.valueOf(dataFields[2]);
+                Double rating = Double.valueOf(dataFields[2]);
 
                 insertInUserRatingMap(userId, movieId, rating, userRatingMap);
                 insertInMovieRatingMap(movieRatingMap, movieId, userId);
@@ -206,13 +210,13 @@ public class Data {
         }
     }
 
-    private static void insertInUserRatingMap(Integer userId, Integer movieId, Integer rating, HashMap<Integer, HashMap<Integer, Integer>> ratingMap) {
+    private static void insertInUserRatingMap(Integer userId, Integer movieId, Double rating, HashMap<Integer, HashMap<Integer, Double>> ratingMap) {
 
         if (ratingMap.containsKey(userId)) {
-            HashMap<Integer, Integer> alreadyPresentMap = ratingMap.get(userId);
+            HashMap<Integer, Double> alreadyPresentMap = ratingMap.get(userId);
             alreadyPresentMap.put(movieId, rating);
         } else {
-            HashMap<Integer, Integer> movieRatingMap = new HashMap<>();
+            HashMap<Integer, Double> movieRatingMap = new HashMap<>();
             movieRatingMap.put(movieId, rating);
             ratingMap.put(userId, movieRatingMap);
         }

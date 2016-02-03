@@ -1,3 +1,5 @@
+package PartA;
+
 import java.util.*;
 
 /**
@@ -7,11 +9,11 @@ public class Recommendation {
 
     public HashMap<Integer, List<Integer>> movieRatingMap;
     public String metric;
-    public HashMap<Integer, HashMap<Integer, Integer>> ratingMap;
+    public HashMap<Integer, HashMap<Integer, Double>> ratingMap;
     String evalType;
     int topSimilarUsers;
 
-    public Recommendation(HashMap<Integer, HashMap<Integer, Integer>> ratingMap, HashMap<Integer, List<Integer>> movieRatingMap, int topSimilarUsers, String evalType, String metric) {
+    public Recommendation(HashMap<Integer, HashMap<Integer, Double>> ratingMap, HashMap<Integer, List<Integer>> movieRatingMap, int topSimilarUsers, String evalType, String metric) {
         this.ratingMap = ratingMap;
         this.movieRatingMap = movieRatingMap;
         this.topSimilarUsers = topSimilarUsers;
@@ -19,14 +21,17 @@ public class Recommendation {
         this.metric = metric;
     }
 
-    public ArrayList<User> findSimilarUsers(int userId) {
+    public ArrayList<User> findSimilarUsers(int userId, Integer movieId) {
         ArrayList<User> scoreList = new ArrayList<>();
 
-        HashMap<Integer, Integer> maptoCompare = ratingMap.get(userId);
+        HashMap<Integer, Double> maptoCompare = ratingMap.get(userId);
+        if (maptoCompare == null) {
+            return null;
+        }
 
         for (int i = 1; i <= ratingMap.size(); i++) {
             if (i != userId) {
-                HashMap<Integer, Integer> compareWith = ratingMap.get(i);
+                HashMap<Integer, Double> compareWith = ratingMap.get(i);
                 double score = getDistance(maptoCompare, compareWith);
                 User user = new User();
                 user.setUserId(i);
@@ -43,7 +48,22 @@ public class Recommendation {
         return scoreList;
     }
 
-    private double getDistance(HashMap<Integer, Integer> mapToCompare, HashMap<Integer, Integer> compareWith) {
+    private double getAvgOfUsersSeenMovie(Integer movieId) {
+        List<Integer> userIdList = movieRatingMap.get(movieId);
+        if (userIdList == null) {
+            return 3;
+        }
+        double sum = 0;
+
+        for (Integer id : userIdList) {
+            double rating = ratingMap.get(id).get(movieId);
+            sum += rating;
+        }
+
+        return sum / userIdList.size();
+    }
+
+    private double getDistance(HashMap<Integer, Double> mapToCompare, HashMap<Integer, Double> compareWith) {
         if (this.metric.equalsIgnoreCase("Euclidean") || this.metric.equals("1")) {
             return getEuclideanDistance(mapToCompare, compareWith);
         } else if (this.metric.equalsIgnoreCase("Manhattan") || this.metric.equals("2")) {
@@ -53,11 +73,11 @@ public class Recommendation {
         }
     }
 
-    private double getLmaxDistance(HashMap<Integer, Integer> mapToCompare, HashMap<Integer, Integer> compareWith) {
+    private double getLmaxDistance(HashMap<Integer, Double> mapToCompare, HashMap<Integer, Double> compareWith) {
         return 0;
     }
 
-    private double getManhattanDistance(HashMap<Integer, Integer> mapToCompare, HashMap<Integer, Integer> compareWith) {
+    private double getManhattanDistance(HashMap<Integer, Double> mapToCompare, HashMap<Integer, Double> compareWith) {
         Iterator it = mapToCompare.entrySet().iterator();
         double distance = 0;
         int matchCount = 0;
@@ -69,7 +89,7 @@ public class Recommendation {
             int movieId = pair.getKey();
 
             if (compareWith.containsKey(movieId)) {
-                int ratingTwo = compareWith.get(movieId);
+                Double ratingTwo = compareWith.get(movieId);
                 distance += Math.abs(ratingOne - ratingTwo);
                 ++matchCount;
             }
@@ -83,7 +103,10 @@ public class Recommendation {
         return Math.sqrt(distance);
     }
 
-    private static double getEuclideanDistance(HashMap<Integer, Integer> mapToCompare, HashMap<Integer, Integer> compareWith) {
+    private static double getEuclideanDistance(HashMap<Integer, Double> mapToCompare, HashMap<Integer, Double> compareWith) {
+        if (mapToCompare == null) {
+            return 0;
+        }
         Iterator it = mapToCompare.entrySet().iterator();
         double distance = 0;
         int matchCount = 0;
@@ -95,7 +118,7 @@ public class Recommendation {
             int movieId = pair.getKey();
 
             if (compareWith.containsKey(movieId)) {
-                int ratingTwo = compareWith.get(movieId);
+                Double ratingTwo = compareWith.get(movieId);
                 distance += Math.pow(ratingOne - ratingTwo, 2);
                 ++matchCount;
             }
@@ -114,11 +137,14 @@ public class Recommendation {
     }
 
     public int getPrediction(int userId, Integer movieId) {
-        ArrayList<User> similarUsers = findSimilarUsers(userId);
-        ArrayList<Integer> similarRatings = new ArrayList<>();
+        ArrayList<User> similarUsers = findSimilarUsers(userId, movieId);
+        if (similarUsers == null) {
+            return (int) Math.round(getAvgOfUsersSeenMovie(movieId));
+        }
+        ArrayList<Double> similarRatings = new ArrayList<>();
 
         for (User similarUser : similarUsers) {
-            HashMap<Integer, Integer> movieRatingMap = ratingMap.get(similarUser.getUserId());
+            HashMap<Integer, Double> movieRatingMap = ratingMap.get(similarUser.getUserId());
             if (movieRatingMap.containsKey(movieId)) {
                 if (similarRatings.size() <= this.topSimilarUsers) {
                     similarRatings.add(movieRatingMap.get(movieId));
@@ -133,11 +159,11 @@ public class Recommendation {
 
     }
 
-    private int getAvg(ArrayList<Integer> similarRatings) {
+    private int getAvg(ArrayList<Double> similarRatings) {
         int sum = 0;
         double avg;
 
-        for (Integer similarRating : similarRatings) {
+        for (Double similarRating : similarRatings) {
             sum += similarRating;
         }
 

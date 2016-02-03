@@ -1,3 +1,5 @@
+package PartA;
+
 import java.util.Comparator;
 
 /**
@@ -7,42 +9,10 @@ public class User implements Comparator<User> {
 
     int userId;
     double score;
-    int rating;
+    double rating;
     int movieId;
-    int predictedRating;
-    int naiveRating;
-
-    public int getNaiveRating() {
-        return naiveRating;
-    }
-
-    public void setNaiveRating(int naiveRating) {
-        this.naiveRating = naiveRating;
-    }
-
-    public int getRating() {
-        return rating;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
-
-    public int getMovieId() {
-        return movieId;
-    }
-
-    public void setMovieId(int movieId) {
-        this.movieId = movieId;
-    }
-
-    public int getPredictedRating() {
-        return predictedRating;
-    }
-
-    public void setPredictedRating(int predictedRating) {
-        this.predictedRating = predictedRating;
-    }
+    double predictedRating;
+    double naiveRating;
 
     public int getUserId() {
         return userId;
@@ -58,6 +28,38 @@ public class User implements Comparator<User> {
 
     public void setScore(double score) {
         this.score = score;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public int getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
+    }
+
+    public double getPredictedRating() {
+        return predictedRating;
+    }
+
+    public void setPredictedRating(double predictedRating) {
+        this.predictedRating = predictedRating;
+    }
+
+    public double getNaiveRating() {
+        return naiveRating;
+    }
+
+    public void setNaiveRating(double naiveRating) {
+        this.naiveRating = naiveRating;
     }
 
     @Override
