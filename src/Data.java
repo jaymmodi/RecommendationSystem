@@ -13,7 +13,7 @@ public class Data {
 
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            int topSimilarUsers = 50;
+            int topSimilarUsers = 7;
 
             System.out.println("Please select a eval Type :  1. Average 2. Maximum Frequency ");
             String evalType = br.readLine();
