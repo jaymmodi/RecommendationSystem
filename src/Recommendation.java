@@ -6,9 +6,11 @@ import java.util.*;
 public class Recommendation {
 
     public HashMap<Integer, HashMap<Integer, Integer>> ratingMap;
+    int topSimilarUsers;
 
-    public Recommendation(HashMap<Integer, HashMap<Integer, Integer>> ratingMap) {
+    public Recommendation(HashMap<Integer, HashMap<Integer, Integer>> ratingMap, int topSimilarUsers) {
         this.ratingMap = ratingMap;
+        this.topSimilarUsers = topSimilarUsers;
     }
 
     public ArrayList<User> findSimilarUsers(int userId) {
@@ -66,10 +68,9 @@ public class Recommendation {
         ArrayList<Integer> similarRatings = new ArrayList<>();
 
         for (User similarUser : similarUsers) {
-//
             HashMap<Integer, Integer> movieRatingMap = ratingMap.get(similarUser.getUserId());
             if (movieRatingMap.containsKey(movieId)) {
-                if (similarRatings.size() <= 50) {
+                if (similarRatings.size() <= this.topSimilarUsers) {
                     similarRatings.add(movieRatingMap.get(movieId));
                 } else {
                     break;
@@ -84,10 +85,14 @@ public class Recommendation {
 
     private int getAvg(ArrayList<Integer> similarRatings) {
         int sum = 0;
+        double avg;
+
         for (Integer similarRating : similarRatings) {
             sum += similarRating;
         }
 
-        return sum / similarRatings.size();
+        avg = sum / similarRatings.size();
+
+        return (int) Math.round(avg);
     }
 }

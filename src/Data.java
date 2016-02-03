@@ -7,36 +7,35 @@ import java.util.*;
 public class Data {
     public static void main(String[] args) {
 
-        HashMap<Integer, HashMap<Integer, Integer>> ratingMap = new HashMap<>();
-        makeUserRatingMap(ratingMap);
+        HashMap<Integer, HashMap<Integer, Integer>> userRatingMap = new HashMap<>();
+        HashMap<Integer, List<Integer>> movieRatingMap = new HashMap<>();
 
-        Recommendation recommendation = new Recommendation(ratingMap);
-//        ArrayList<User> similarUsers = recommendation.findSimilarUsers(1);
+        makeUserRatingMap(userRatingMap, movieRatingMap);
 
         int topSimilarUsers = 50;
-        readTestFile(recommendation,topSimilarUsers);
+        Recommendation recommendation = new Recommendation(userRatingMap, topSimilarUsers);
 
+        readTestFile(recommendation);
 
-//        printList(similarUsers);
     }
 
-    private static void readTestFile(Recommendation recommendation, int topSimilarUsers) {
+    private static void readTestFile(Recommendation recommendation) {
         try {
             FileReader fileReader = new FileReader(new File("test"));
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                String datafields[] = line.split("\t");
+                String dataFields[] = line.split("\t");
 
                 User user = new User();
-                user.setUserId(Integer.valueOf(datafields[0]));
-                user.setMovieId(Integer.valueOf(datafields[1]));
-                user.setRating(Integer.valueOf(datafields[2]));
+                user.setUserId(Integer.valueOf(dataFields[0]));
+                user.setMovieId(Integer.valueOf(dataFields[1]));
+                user.setRating(Integer.valueOf(dataFields[2]));
 
-                user.setPredictedRating(getPredictedRating(recommendation, user.getUserId(), Integer.valueOf(datafields[1])));
+                user.setPredictedRating(getPredictedRating(recommendation, user.getUserId(), Integer.valueOf(dataFields[1])));
 
-
+                System.out.println("True= " + user.getRating() + " Predicted= " + user.getPredictedRating());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -46,10 +45,7 @@ public class Data {
 
     private static int getPredictedRating(Recommendation recommendation, int userId, Integer movieId) {
 
-        int rating = recommendation.getPrediction(userId, movieId);
-        System.out.println("rating = " + rating);
-
-        return rating;
+        return recommendation.getPrediction(userId, movieId);
     }
 
     private static void printList(ArrayList<User> similarUsers) {
@@ -59,7 +55,7 @@ public class Data {
     }
 
 
-    private static void makeUserRatingMap(HashMap<Integer, HashMap<Integer, Integer>> ratingMap) {
+    private static void makeUserRatingMap(HashMap<Integer, HashMap<Integer, Integer>> userRatingMap, HashMap<Integer, List<Integer>> movieRatingMap) {
         try {
             FileReader fileReader = new FileReader(new File("u1.base"));
             BufferedReader br = new BufferedReader(fileReader);
@@ -73,22 +69,32 @@ public class Data {
                 Integer movieId = Integer.valueOf(dataFields[1]);
                 Integer rating = Integer.valueOf(dataFields[2]);
 
-                insertInMap(userId, movieId, rating, ratingMap);
+                insertInUserRatingMap(userId, movieId, rating, userRatingMap);
+                insertInMovieRatingMap(movieRatingMap, movieId, userId);
             }
 
-            System.out.println(ratingMap.size());
             fileReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void insertInMap(Integer userId, Integer movieId, Integer rating, HashMap<Integer, HashMap<Integer, Integer>> ratingMap) {
+    private static void insertInMovieRatingMap(HashMap<Integer, List<Integer>> movieRatingMap, Integer movieId, Integer userId) {
+        if (movieRatingMap.containsKey(movieId)) {
+            ArrayList<Integer> arrayList = (ArrayList<Integer>) movieRatingMap.get(movieId);
+            arrayList.add(userId);
+        } else {
+            ArrayList<Integer> userList = new ArrayList<>();
+            userList.add(userId);
+            movieRatingMap.put(movieId, userList);
+        }
+    }
+
+    private static void insertInUserRatingMap(Integer userId, Integer movieId, Integer rating, HashMap<Integer, HashMap<Integer, Integer>> ratingMap) {
 
         if (ratingMap.containsKey(userId)) {
             HashMap<Integer, Integer> alreadyPresentMap = ratingMap.get(userId);
             alreadyPresentMap.put(movieId, rating);
-
         } else {
             HashMap<Integer, Integer> movieRatingMap = new HashMap<>();
             movieRatingMap.put(movieId, rating);
