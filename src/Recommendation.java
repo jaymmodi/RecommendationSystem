@@ -5,13 +5,15 @@ import java.util.*;
  */
 public class Recommendation {
 
+    public HashMap<Integer, List<Integer>> movieRatingMap;
     public String metric;
     public HashMap<Integer, HashMap<Integer, Integer>> ratingMap;
     String evalType;
     int topSimilarUsers;
 
-    public Recommendation(HashMap<Integer, HashMap<Integer, Integer>> ratingMap, int topSimilarUsers, String evalType, String metric) {
+    public Recommendation(HashMap<Integer, HashMap<Integer, Integer>> ratingMap, HashMap<Integer, List<Integer>> movieRatingMap, int topSimilarUsers, String evalType, String metric) {
         this.ratingMap = ratingMap;
+        this.movieRatingMap = movieRatingMap;
         this.topSimilarUsers = topSimilarUsers;
         this.evalType = evalType;
         this.metric = metric;
@@ -33,7 +35,7 @@ public class Recommendation {
             }
 
         }
-        if(scoreList.size() == 0) {
+        if (scoreList.size() == 0) {
             System.out.println("empty hai");
         }
         customSort(scoreList);
@@ -101,10 +103,28 @@ public class Recommendation {
 
         if (similarRatings.size() > 0) {
             avg = sum / similarRatings.size();
-        }else{
+        } else {
             avg = 3;
         }
 
         return (int) Math.round(avg);
+    }
+
+    public int getNaiveRating(Integer movieId) {
+        List<Integer> userList = movieRatingMap.get(movieId);
+        if (userList != null) {
+            int sum = 0;
+            double avg;
+
+            for (Integer userID : userList) {
+                sum += ratingMap.get(userID).get(movieId);
+            }
+
+            avg = sum / userList.size();
+
+            return (int) Math.round(avg);
+        } else {
+            return 3;
+        }
     }
 }

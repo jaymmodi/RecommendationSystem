@@ -10,6 +10,15 @@ public class User implements Comparator<User> {
     int rating;
     int movieId;
     int predictedRating;
+    int naiveRating;
+
+    public int getNaiveRating() {
+        return naiveRating;
+    }
+
+    public void setNaiveRating(int naiveRating) {
+        this.naiveRating = naiveRating;
+    }
 
     public int getRating() {
         return rating;

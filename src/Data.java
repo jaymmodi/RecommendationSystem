@@ -7,12 +7,13 @@ import java.util.*;
 public class Data {
 
     public static double MAD = 0;
+    public static double SIMPLEMAD = 0;
 
     public static void main(String[] args) {
 
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            int topSimilarUsers = 25;
+            int topSimilarUsers = 50;
 
             System.out.println("Please select a eval Type :  1. Average 2. Maximum Frequency ");
             String evalType = br.readLine();
@@ -34,12 +35,18 @@ public class Data {
 
             HashMap<Integer, HashMap<Integer, Integer>> userRatingMap = new HashMap<>();
             HashMap<Integer, List<Integer>> movieRatingMap = new HashMap<>();
-            Recommendation recommendation = new Recommendation(userRatingMap, topSimilarUsers, metric, evalType);
+            Recommendation recommendation = new Recommendation(userRatingMap, movieRatingMap, topSimilarUsers, metric, evalType);
 
-            makeUserRatingMap(userRatingMap, movieRatingMap);
-            readTestFile(recommendation);
 
-            System.out.println(MAD / 100000);
+            String fileNames[] = {"u1","u2","u3","u4","u5"};
+
+            for (String fileName : fileNames) {
+                makeUserRatingMap(userRatingMap, movieRatingMap, fileName + ".base");
+                readTestFile(recommendation, fileName + ".test");
+            }
+
+            System.out.println("MAD = " + MAD / 100000);
+            System.out.println("Naive MAD = " + SIMPLEMAD/ 100000);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -61,9 +68,9 @@ public class Data {
         return "exit";
     }
 
-    private static void readTestFile(Recommendation recommendation) {
+    private static void readTestFile(Recommendation recommendation, String testFileName) {
         try {
-            FileReader fileReader = new FileReader(new File("u1.test"));
+            FileReader fileReader = new FileReader(new File(testFileName));
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             String line;
@@ -76,15 +83,22 @@ public class Data {
                 user.setRating(Integer.valueOf(dataFields[2]));
 
                 user.setPredictedRating(getPredictedRating(recommendation, user.getUserId(), Integer.valueOf(dataFields[1])));
+                user.setNaiveRating(getNaiveRating(recommendation, Integer.valueOf(dataFields[1])));
 
                 System.out.println("True= " + user.getRating() + " Predicted= " + user.getPredictedRating());
                 MAD += Math.abs(user.getRating() - user.getPredictedRating());
+                SIMPLEMAD += Math.abs(user.getNaiveRating()-user.getRating());
+
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
 
+    }
+
+    private static int getNaiveRating(Recommendation recommendation, Integer movieId) {
+        return recommendation.getNaiveRating(movieId);
     }
 
     private static int getPredictedRating(Recommendation recommendation, int userId, Integer movieId) {
@@ -99,9 +113,9 @@ public class Data {
     }
 
 
-    private static void makeUserRatingMap(HashMap<Integer, HashMap<Integer, Integer>> userRatingMap, HashMap<Integer, List<Integer>> movieRatingMap) {
+    private static void makeUserRatingMap(HashMap<Integer, HashMap<Integer, Integer>> userRatingMap, HashMap<Integer, List<Integer>> movieRatingMap, String trainFileName) {
         try {
-            FileReader fileReader = new FileReader(new File("u1.base"));
+            FileReader fileReader = new FileReader(new File(trainFileName));
             BufferedReader br = new BufferedReader(fileReader);
 
             String line;
